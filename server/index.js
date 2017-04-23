@@ -10,33 +10,38 @@ var VK    = new VKApi({
 });
 var UserModel = require('./mongoose').UserModel;
 
-app.get('/', function (req, res) {
-
-
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
 });
 
-app.post('/', function (req, res) {
+var fetchedCount = 0;
 
-    for(var i = 0; i < 10; i++){
-        var totalLimit = 3000000;
-        var currentPartLimit = 3000000/10;
+app.post('/importVKUsers', function (req, res) {
+    fetchedCount = 0;
+    var totalLimit = 50000;
+    var threads = 5;
+
+    for(var i = 0; i < threads; i++){
+        var currentPartLimit = totalLimit/threads;
         var offset = currentPartLimit * i;
         var currentPartEnd = offset+currentPartLimit;
         var currentReq = 0;
 
-        console.log(totalLimit, currentPartLimit, offset, currentPartEnd, currentReq);
+        //console.log(totalLimit, currentPartLimit, offset, currentPartEnd, currentReq);
         importUsers(res, totalLimit, currentPartLimit, offset, currentPartEnd, currentReq);
     }
 });
 
-var fatchedCount = 0;
-var fatchedResult = [];
+
+
 
 app.post('/getUsers', function(req, res){
     UserModel.aggregate([
         {
             $match: {
-                "country.title": { "$exists": true, "$ne": null }
+                "country.title": { "$exists": true, "$ne": null, "$ne": "" }
             }
         },
         {
@@ -48,7 +53,8 @@ app.post('/getUsers', function(req, res){
         }
     ], function (err, result) {
         if (err) {
-            console.log(err);
+            console.log(result);
+            res.sendStatus(500);
         } else {
             console.log(result);
             res.send(result);
@@ -65,16 +71,17 @@ function importUsers(res, totalLimit, currentPartLimit, offset, currentPartEnd, 
         group_id: '40567146',
         count: limit,
         offset: offset,
-        fields: 'country,city'
+        fields: 'country,city',
+        lang: 'en'
     }).then(function(result){
-        //console.log(result);
-        fatchedCount += result.items.length;
-        console.log('total fatrched: ', fatchedCount);
+        fetchedCount += result.items.length;
+        console.log('total fetched: ', fetchedCount);
 
         UserModel.insertMany(result.items, function(err, result){
-           // console.log(result);
+            if(err){
+                console.log(err.toString());
+            }
         });
-
 
         var newOffset = offset+limit;
         console.log('new offset:', newOffset);
@@ -83,9 +90,9 @@ function importUsers(res, totalLimit, currentPartLimit, offset, currentPartEnd, 
 
         console.log('new current request:', newCurrentRequest);
 
-        if(fatchedCount >= totalLimit){
+        if(fetchedCount >= totalLimit){
             console.log("finish limit", totalLimit);
-            return res.send("Count:"+fatchedCount);
+            return res.send("Imported: " + fetchedCount + " users");
         }else if(newOffset >= currentPartEnd){
            console.log("finish offset", newOffset);
             return;
@@ -93,14 +100,10 @@ function importUsers(res, totalLimit, currentPartLimit, offset, currentPartEnd, 
             importUsers(res, totalLimit, currentPartLimit, newOffset, currentPartEnd, newCurrentRequest);
 
         }
-
-
-        //
     }).catch(function(err){
         console.log(err);
     });
 }
-
 
 app.listen(3000, function () {
     console.log('Server listening on port 3000!');
