@@ -1,14 +1,13 @@
 import React from 'react'
 import { Chart } from 'react-google-charts';
 
-
 export default class Charts extends React.Component{
     constructor(props) {
         super();
         const {users} = props;
 
         const barChartFilteredData = users.filter((user) => {
-            return user.count > 2000;
+            return user.count > 3000;
         });
 
         const barChartData = barChartFilteredData.map((user) => {
@@ -25,21 +24,16 @@ export default class Charts extends React.Component{
         this.state = {
             barChartOptions: {
                 title: 'Top Countries by Users',
-                //vAxis: {title: 'Year', titleTextStyle: {color: 'red'}},
-                //  legend: 'none',
             },
             pieChartOptions: {
-                title: 'Users by Coutry',
+                title: 'Users by Country',
                 sliceVisibilityThreshold: 1/1000
-                //  legend: 'none',
             },
             pieChartData: pieChartData,
             barChartData: barChartData
         };
     }
     render() {
-        //console.log(pieChartData);
-
         return (
             <div>
                 <Chart
@@ -48,7 +42,7 @@ export default class Charts extends React.Component{
                     options={this.state.pieChartOptions}
                     graph_id="PieChart"
                     width="50%"
-                    height="200px"
+                    height="300px"
                     legend_toggle
                     />
                 <Chart
@@ -57,7 +51,7 @@ export default class Charts extends React.Component{
                     options={this.state.barChartOptions}
                     graph_id="BarChart"
                     width="70%"
-                    height="300px"
+                    height="400px"
                     legend_toggle
                     />
             </div>

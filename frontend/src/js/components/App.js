@@ -3,7 +3,6 @@ import { connect } from 'react-redux'
 import { fetchUsers, importVKUsers } from "../actions/usersActions"
 import Table from './Table'
 import Charts from './Charts'
-import '../../assets/bootstrap/css/bootstrap.min.css'
 
 @connect((store) => {
     return {
@@ -17,7 +16,7 @@ export default class App extends React.Component {
     constructor(){
         super();
         this.state = {
-            title : "Users by country statistics from VK group id40567146",
+            title : "Users by country statistics from VK group \"Лайфхак\" (public40567146)",
         };
     }
 

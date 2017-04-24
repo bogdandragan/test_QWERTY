@@ -1,7 +1,6 @@
 import React from 'react'
 import TableRow from "./TableRow"
 import TableHeader from "./TableHeader"
-import '../../assets/bootstrap/css/bootstrap.min.css'
 
 export default class Table extends React.Component{
     constructor(){

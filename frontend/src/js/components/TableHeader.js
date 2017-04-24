@@ -1,7 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { sortUsers } from "../actions/usersActions"
-import '../../assets/bootstrap/css/bootstrap.min.css'
 
 @connect((store) => {
     return {
